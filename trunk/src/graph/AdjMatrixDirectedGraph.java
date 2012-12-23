@@ -28,9 +28,9 @@ import java.io.Writer;
 import java.util.Iterator;
 import java.util.Vector;
 
-public class AdjMatrixGraph extends Graph {
+public class AdjMatrixDirectedGraph extends Graph {
 	
-	public AdjMatrixGraph(int numVertex) {
+	public AdjMatrixDirectedGraph(int numVertex) {
 
 		super(numVertex);
 		

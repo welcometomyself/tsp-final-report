@@ -15,7 +15,9 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- *   Last Update: 2012/12/09
+ *   2012/12/09
+ *   
+ *   Last Update: 2012/12/23
  */
 
 package tsp;
@@ -37,11 +39,18 @@ public class TSPBruteForce {
 
 	public static void main(String[] args) throws IOException {
 		
-		//Graph g = GraphFactory.readFromFile("graph4.txt");
-		//Graph g = GraphFactory.getRandomUndirectedGraph(10);  // numVertex(cities)
-		// DirectedGraph g = GraphFactory.getRandomUndirectedGraph(5, 0);  // numVertex(cities), random seed
-	     AdjMatrixGraph g = GraphFactory.getRandomUndirectedGraph(11, 0);  // numVertex(cities), random seed
+		// AdjMatrixDirectedGraph g = GraphFactory.readFromFile("graph2.txt");
+		
+		// AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(10); // Given numVertex(cities) as input parameter
+		// AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(10);  // Given numVertex(cities) as input parameter
+		
+		
+	     //AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(11, 0);  // Given numVertex(cities), seed as input parameter
+	     //AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(10, 0);  // Given numVertex(cities), seed as input parameter
+	     //AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(11, 0);  // Given numVertex(cities), seed as input parameter
+	     AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(5, 0);  // Given numVertex(cities), seed as input parameter
 	     
+		
 		System.out.println("numVertex: " + g.getNumVertex());
 		System.out.println("numEdges: " + g.getNumEdges());
 		
@@ -49,7 +58,13 @@ public class TSPBruteForce {
 		g.printCostMatrix();
 		System.out.println("");
 		
+		//AdjMatrixUndirectedGraph g2 = GraphFactory.directed2Undirected(g);
+		//System.out.println("g2 cost matrix");
+		//g2.printCostMatrix();
+		
 		TSPBruteForce tsp = new TSPBruteForce(g);
+		//TSPBruteForce tsp = new TSPBruteForce(g2);
+		
 		//tsp.printAllPaths();
 		System.out.println("Searching for the best path ... ");
 		ArrayList<Integer[]> bestPathList = tsp.getBestPathList();
@@ -68,7 +83,7 @@ public class TSPBruteForce {
 		
 	}
 	
-	public TSPBruteForce(AdjMatrixGraph g) {
+	public TSPBruteForce(Graph g) {
 		this.g = g;
 	}
 	
@@ -179,6 +194,6 @@ public class TSPBruteForce {
 		
 	}
 	
-	private AdjMatrixGraph g;
+	private Graph g;
 
 }

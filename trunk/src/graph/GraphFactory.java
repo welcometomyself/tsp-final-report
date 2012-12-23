@@ -14,7 +14,9 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- *   Last Update: 2012/12/09
+ * 	 2012/12/09
+ * 
+ *   Last Update: 2012/12/23
  * 
  */
 
@@ -31,8 +33,20 @@ public class GraphFactory {
 	// For Unit Test
 	public static void main(String[] args) throws IOException {
 
-		BufferedReader r = new BufferedReader(new FileReader("graph.txt"));
-		AdjMatrixGraph g = GraphFactory.read(r);
+		//BufferedReader r = new BufferedReader(new FileReader("graph2.txt"));
+		//AdjMatrixDirectedGraph g = GraphFactory.read(r);
+		
+		// AdjMatrixDirectedGraph g = GraphFactory.readFromFile("graph2.txt");
+		
+		// AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(10); // Given numVertex(cities) as input parameter
+		// AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(10);  // Given numVertex(cities) as input parameter
+		
+	     //AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(11, 0);  // Given numVertex(cities), seed as input parameter
+	     //AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(10, 0);  // Given numVertex(cities), seed as input parameter
+	     //AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(11, 0);  // Given numVertex(cities), seed as input parameter
+	     AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(5, 0);  // Given numVertex(cities), seed as input parameter
+		
+	     
 		System.out.println("numVertex: " + g.getNumVertex());
 		System.out.println("numEdges: " + g.getNumEdges());
 		
@@ -43,56 +57,70 @@ public class GraphFactory {
 		g.setVertexName(4, "TPE");
 		
 		g.printCostMatrix();
+		
+		System.out.println("");
+		
+		AdjMatrixUndirectedGraph g2 = GraphFactory.directed2Undirected(g);
+		g2.printCostMatrix();
+		
+		System.out.println("");
+		
+		AdjMatrixDirectedGraph g3 = GraphFactory.undirected2Directed(g2);
+		g3.printCostMatrix();
+		
 	}
 	
-	// Get random undirected(symmetric) graph
-	public static AdjMatrixGraph getRandomUndirectedGraph(int numVertex) {
+	
+	// Get random undirected adjacency matrix graph
+	public static AdjMatrixUndirectedGraph getRandomUndirectedGraph(int numVertex) {
 		int maxEdgeCost = 5;
 		Random rnd = new Random();
-		AdjMatrixGraph g = getRandomGraph(numVertex, maxEdgeCost, rnd);
-		for (int i=1; i<numVertex; i++)
-			for (int j=0; j<i; j++)
-				g.setEdgeCost(i, j, g.getEdgeCost(j, i));
-		return g;
+		return getRandomUndirectedGraph(numVertex, maxEdgeCost, rnd);
 	}
 	
-	public static AdjMatrixGraph getRandomUndirectedGraph(int numVertex, long seed) {
+	public static AdjMatrixUndirectedGraph getRandomUndirectedGraph(int numVertex, long seed) {
 		int maxEdgeCost = 5;
-		AdjMatrixGraph g = getRandomGraph(numVertex, maxEdgeCost, seed);
-		for (int i=1; i<numVertex; i++)
-			for (int j=0; j<i; j++)
-				g.setEdgeCost(i, j, g.getEdgeCost(j, i));
-		return g;
+		return getRandomUndirectedGraph(numVertex, maxEdgeCost, seed);
 	}
 	
-	public static AdjMatrixGraph getRandomUndirectedGraph(int numVertex, int maxEdgeCost, long seed) {
+	public static AdjMatrixUndirectedGraph getRandomUndirectedGraph(int numVertex, int maxEdgeCost, long seed) {
 		Random rnd = new Random(seed);
-		AdjMatrixGraph g = getRandomGraph(numVertex, maxEdgeCost, rnd);
-		for (int i=1; i<numVertex; i++)
-			for (int j=0; j<i; j++)
-				g.setEdgeCost(i, j, g.getEdgeCost(j, i));
+		return getRandomUndirectedGraph(numVertex, maxEdgeCost, rnd);
+	}
+
+	private static AdjMatrixUndirectedGraph getRandomUndirectedGraph(int numVertex, int maxEdgeCost, Random rnd) {
+		AdjMatrixUndirectedGraph g = new AdjMatrixUndirectedGraph(numVertex);
+		int tmpCost;
+		for (int i=0; i<numVertex; i++) {
+			for (int j=0; j<=i; j++) {
+				tmpCost = (int)(rnd.nextInt(maxEdgeCost));
+				if (tmpCost > 0 && i!=j) g.setEdgeCost(i, j, tmpCost);
+			}
+		}
 		return g;
 	}
 	
-	// Get random (directed) graph
-	public static AdjMatrixGraph getRandomGraph(int numVertex) {
+	
+	
+	// Get random directed adjacency matrix graph
+	public static AdjMatrixDirectedGraph getRandomDirectedGraph(int numVertex) {
 		int maxEdgeCost = 5;
 		Random rnd = new Random();
-		return getRandomGraph(numVertex, maxEdgeCost, rnd);
+		return getRandomDirectedGraph(numVertex, maxEdgeCost, rnd);
 	}
 	
-	public static AdjMatrixGraph getRandomGraph(int numVertex, long seed) {
+	public static AdjMatrixDirectedGraph getRandomDirectedGraph(int numVertex, long seed) {
 		int maxEdgeCost = 5;
-		return getRandomGraph(numVertex, maxEdgeCost, seed);
+		return getRandomDirectedGraph(numVertex, maxEdgeCost, seed);
 	}
 	
-	public static AdjMatrixGraph getRandomGraph(int numVertex, int maxEdgeCost, long seed) {
+	public static AdjMatrixDirectedGraph getRandomDirectedGraph(int numVertex, int maxEdgeCost, long seed) {
 		Random rnd = new Random(seed);
-		return getRandomGraph(numVertex, maxEdgeCost, rnd);
+		return getRandomDirectedGraph(numVertex, maxEdgeCost, rnd);
 	}
-	
-	private static AdjMatrixGraph getRandomGraph(int numVertex, int maxEdgeCost, Random rnd) {
-		AdjMatrixGraph g = new AdjMatrixGraph(numVertex);
+
+	private static AdjMatrixDirectedGraph getRandomDirectedGraph(int numVertex, int maxEdgeCost, Random rnd) {
+		AdjMatrixDirectedGraph g = new AdjMatrixDirectedGraph(numVertex);
 		int tmpCost;
 		for (int i=0; i<numVertex; i++) {
 			for (int j=0; j<numVertex; j++) {
@@ -105,17 +133,52 @@ public class GraphFactory {
 	
 	
 	/*
+	 * Degrade given directed graph into an undirected graph, removing the upper triangular entries
+	 */
+	public static AdjMatrixUndirectedGraph directed2Undirected(AdjMatrixDirectedGraph directedGraph) {
+		int numVertex = directedGraph.getNumVertex();
+		AdjMatrixUndirectedGraph g = new AdjMatrixUndirectedGraph(numVertex);
+		for (int i=0; i<numVertex; i++) {
+			g.setVertexName(i, directedGraph.getVertexName(i));
+			for (int j=0; j<=i; j++) {
+				 g.setEdgeCost(i, j, directedGraph.getEdgeCost(i, j));
+			}
+		}
+		return g;
+	}
+	
+	
+	/*
+	 * Upgrade given undirected graph into a symmetric directed graph
+	 */
+	public static AdjMatrixDirectedGraph undirected2Directed(AdjMatrixUndirectedGraph undirectedGraph) {
+		int numVertex = undirectedGraph.getNumVertex();
+		AdjMatrixDirectedGraph g = new AdjMatrixDirectedGraph(numVertex);
+		for (int i=0; i<numVertex; i++) {
+			g.setVertexName(i, undirectedGraph.getVertexName(i));
+			for (int j=0; j<=i; j++) {
+				 g.setEdgeCost(i, j, undirectedGraph.getEdgeCost(i, j));
+			}
+			for (int j=i+1; j<numVertex; j++) {
+				g.setEdgeCost(i, j, undirectedGraph.getEdgeCost(j, i));
+			}
+		}
+		return g;
+	}
+	
+	
+	/*
 	 *   Reads and returns a graph defined by lines of texts:
 	 *   1. The first line contains only an integer representing the number of vertices
 	 *   2. The following lines contain the edges represented by three columns i:Integer, j:Integer, edge_cost:Double delimited by spaces
 	 *      Where i is the start node and j is the end node of the edge
 	*/
-	public static AdjMatrixGraph readFromFile(String filePath) throws IOException {
+	public static AdjMatrixDirectedGraph readFromFile(String filePath) throws IOException {
 		BufferedReader r = new BufferedReader(new FileReader(filePath));
 		return read(r);
 	}
 	
-	public static AdjMatrixGraph read(BufferedReader r) throws IOException {
+	public static AdjMatrixDirectedGraph read(BufferedReader r) throws IOException {
 		//return new Graph(20);
 		String line;
 		
@@ -124,7 +187,7 @@ public class GraphFactory {
 		double edgeCost;
 		int numVertex;
 		numVertex = Integer.parseInt(r.readLine());
-		AdjMatrixGraph g = new AdjMatrixGraph(numVertex);
+		AdjMatrixDirectedGraph g = new AdjMatrixDirectedGraph(numVertex);
 				
 		while (true) {
 			
