@@ -24,7 +24,7 @@ import java.util.Vector;
 
 public abstract class Graph {
 
-	public static final int MAXEDGECOST = 999;
+	public static final int MAXEDGECOST = 999999;
 	
 	public Graph(int numVertex) {
 

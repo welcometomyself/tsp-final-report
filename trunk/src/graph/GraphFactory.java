@@ -1,3 +1,4 @@
+
 /*
  *   GraphFactory
  * 
@@ -73,13 +74,15 @@ public class GraphFactory {
 	
 	// Get random undirected adjacency matrix graph
 	public static AdjMatrixUndirectedGraph getRandomUndirectedGraph(int numVertex) {
-		int maxEdgeCost = 5;
+		int maxEdgeCost = numVertex/2;
+		if (maxEdgeCost > 100) maxEdgeCost=100;
 		Random rnd = new Random();
 		return getRandomUndirectedGraph(numVertex, maxEdgeCost, rnd);
 	}
 	
 	public static AdjMatrixUndirectedGraph getRandomUndirectedGraph(int numVertex, long seed) {
-		int maxEdgeCost = 5;
+		int maxEdgeCost = numVertex/2;
+		if (maxEdgeCost > 100) maxEdgeCost=100;
 		return getRandomUndirectedGraph(numVertex, maxEdgeCost, seed);
 	}
 	
@@ -93,7 +96,7 @@ public class GraphFactory {
 		int tmpCost;
 		for (int i=0; i<numVertex; i++) {
 			for (int j=0; j<=i; j++) {
-				tmpCost = (int)(rnd.nextInt(maxEdgeCost));
+				tmpCost = (int)(rnd.nextInt(maxEdgeCost)+1);
 				if (tmpCost > 0 && i!=j) g.setEdgeCost(i, j, tmpCost);
 			}
 		}
@@ -104,13 +107,15 @@ public class GraphFactory {
 	
 	// Get random directed adjacency matrix graph
 	public static AdjMatrixDirectedGraph getRandomDirectedGraph(int numVertex) {
-		int maxEdgeCost = 5;
+		int maxEdgeCost = numVertex/2;
+		if (maxEdgeCost > 100) maxEdgeCost=100;
 		Random rnd = new Random();
 		return getRandomDirectedGraph(numVertex, maxEdgeCost, rnd);
 	}
 	
 	public static AdjMatrixDirectedGraph getRandomDirectedGraph(int numVertex, long seed) {
-		int maxEdgeCost = 5;
+		int maxEdgeCost = numVertex/2;
+		if (maxEdgeCost > 100) maxEdgeCost=100;
 		return getRandomDirectedGraph(numVertex, maxEdgeCost, seed);
 	}
 	
@@ -124,7 +129,7 @@ public class GraphFactory {
 		int tmpCost;
 		for (int i=0; i<numVertex; i++) {
 			for (int j=0; j<numVertex; j++) {
-				tmpCost = (int)(rnd.nextInt(maxEdgeCost));
+				tmpCost = (int)(rnd.nextInt(maxEdgeCost)+1);
 				if (tmpCost > 0 && i!=j) g.setEdgeCost(i, j, tmpCost);
 			}
 		}

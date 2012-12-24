@@ -77,14 +77,19 @@ public class AdjMatrixDirectedGraph extends Graph {
 
 	public void printCostMatrix(BufferedWriter w) throws IOException {
 
+		double tmpCost;
 		w.write("      ");
 		for (int i = 0; i < getNumVertex(); i++)
 			w.write(String.format("%5s ", getVertexName(i)));
 		w.write("\n");
 		for (int i = 0; i < getNumVertex(); i++) {
 			w.write(String.format("%5s ", getVertexName(i)));
-			for (int j = 0; j < getNumVertex(); j++)
-				w.write(String.format("%5.0f ", getEdgeCost(i, j)));
+			for (int j = 0; j < getNumVertex(); j++) {
+				tmpCost=getEdgeCost(i,j);
+				if (tmpCost<Graph.MAXEDGECOST)
+					w.write(String.format("%5.0f ", tmpCost));
+				else w.write(String.format("  INF "));
+			}
 			w.write("\n");
 		}
 		w.flush();
