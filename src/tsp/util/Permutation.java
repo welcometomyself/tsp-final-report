@@ -67,7 +67,7 @@ public class Permutation {
 	}
 
 	// swaps two elements (with indexes i and j) in array 
-	private static void swap( final Comparable[] c, final int i, final int j ) {
+	public static void swap( final Comparable[] c, final int i, final int j ) {
 		final Comparable tmp = c[ i ];
 		c[ i ] = c[ j ];
 		c[ j ] = tmp;

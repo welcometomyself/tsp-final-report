@@ -66,6 +66,7 @@ public class TSPBruteForce {
 		//TSPBruteForce tsp = new TSPBruteForce(g2);
 		
 		//tsp.printAllPaths();
+		
 		System.out.println("Searching for the best path ... ");
 		ArrayList<Integer[]> bestPathList = tsp.getBestPathList();
 		
