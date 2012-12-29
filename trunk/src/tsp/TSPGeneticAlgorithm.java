@@ -17,7 +17,7 @@
  * 
  *   2012/12/24
  *   
- *   Last Update: 2012/12/24
+ *   Last Update: 2012/12/29
  */
 
 package tsp;
@@ -43,7 +43,7 @@ public class TSPGeneticAlgorithm {
 		// AdjMatrixDirectedGraph g = GraphFactory.readFromFile("graph2.txt");
 		
 		// AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(100); // Given numVertex(cities) as input parameter
-		 AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(100);  // Given numVertex(cities) as input parameter
+		 AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(10);  // Given numVertex(cities) as input parameter
 		
 	     //AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(11, 0);  // Given numVertex(cities), seed as input parameter
 	     //AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(10, 0);  // Given numVertex(cities), seed as input parameter
@@ -60,14 +60,11 @@ public class TSPGeneticAlgorithm {
 		
 		TSPGeneticAlgorithm tsp = new TSPGeneticAlgorithm(g);
 		
-		//tsp.printAllPaths();
-		
-		ArrayList<Integer[]> population = tsp.getRandomPathList(50);
+		ArrayList<TSPPath> population = tsp.getRandomPathList(50);
 		System.out.printf("Found %d randomly generated routes:\n", population.size());
 		Iterator it = population.iterator();
 		while (it.hasNext()) {
-			tsp.printPath((Integer[])it.next());
-			//tsp.printPathNames((Integer[])it.next());
+			((TSPPath)it.next()).printPath();
 		}
 		
 		
@@ -79,39 +76,35 @@ public class TSPGeneticAlgorithm {
 	
 	
 	// Get a list of random paths(chromosomes), may be used as the initial population of genetic algorithm
-	public ArrayList<Integer[]> getRandomPathList(int numPath) {
+	public ArrayList<TSPPath> getRandomPathList(int numPath) {
 		
 		int numVertex = g.getNumVertex();
-		ArrayList<Integer[]> pathList = new ArrayList<Integer[]>(numPath);
-		Integer[] path = new Integer[numVertex];
-
-		for (int i=0; i<numVertex; i++) path[i] = i; // initial path
+		ArrayList<TSPPath> pathList = new ArrayList<TSPPath>(numPath);
+		
+		Integer[] pathNodes = new Integer[numVertex];
+		for (int i=0; i<numVertex; i++) pathNodes[i] = i; // initial path
 		
 		Random rnd = new Random();
 		
 		// iterationLimit is to prevent the situation when the number of cities is large and the number of INF-distance edges is also large
 		final int iterationLimit=9999999;
-		int numSwap=numVertex>200?30:numVertex/10+10;
+		//int numSwap=numVertex>200?30:numVertex/10+10;
+		int numSwap=3;
 		int iterationCount=0;
 		int numPathFound=0;
-		while ((path = (Integer[])Permutation.nextPermutation(path)) != null && numPathFound < numPath && iterationCount < iterationLimit) {
-			Integer[] randomPath = path.clone();
+		while (numPathFound < numPath && iterationCount < iterationLimit) {
+			
 			int i,j;
-			
-			// swap vertex-1 with another random vertex
-			i=1;
-			j=rnd.nextInt(numVertex-1);
-			Permutation.swap(randomPath, i, j);
-			
-			// swap again several times (swap more times if the numVertex is large)
+			// swap several times
 			for (int count=0; count<numSwap; count++) {
 				i=rnd.nextInt(numVertex-1);
 				j=rnd.nextInt(numVertex-1);
-				Permutation.swap(randomPath, i, j);
+				Permutation.swap(pathNodes, i, j);
 			}
 			
-			if (getPathCost(randomPath)<Graph.MAXEDGECOST) {
-				pathList.add(randomPath);
+			TSPPath tspPath = new TSPPath(pathNodes, g);
+			if (tspPath.getCost()<Graph.MAXEDGECOST) {
+				pathList.add(tspPath);
 				numPathFound++;
 			}
 			iterationCount++; 
@@ -124,7 +117,6 @@ public class TSPGeneticAlgorithm {
 	//public ArrayList<Integer[]> getRandomGreedyPathList(int numPath) {
 	//	
 	//}
-	
 	
 	
 	/*
@@ -140,41 +132,12 @@ public class TSPGeneticAlgorithm {
 	
 	*/
 	
-	public double getPathCost(Integer[] pathNodes) {
+	public void selectFromPopulation(ArrayList<Integer[]> pop, ArrayList<Integer[]> survivors) {
+		int numSurvivors = survivors.size();
+		int numPop = pop.size();
 		
-		if (pathNodes.length<2) return Graph.MAXEDGECOST;
-		int i;
-		double tmpCost;
-		double pathCost=0;
-		for (i=0; i<pathNodes.length-1; i++) {
-			//tmpCost = g.getEdgeCost(pathNodes[i], pathNodes[i+1]);
-			//if (tmpCost == Graph.MAXEDGECOST) return Graph.MAXEDGECOST;
-			//pathCost += tmpCost;
-			pathCost += g.getEdgeCost(pathNodes[i], pathNodes[i+1]);
-		}
-		//tmpCost = g.getEdgeCost(pathNodes[pathNodes.length-1], pathNodes[0]);
-		//if (tmpCost == Graph.MAXEDGECOST) return Graph.MAXEDGECOST;
-		//pathCost += tmpCost;
-		pathCost += g.getEdgeCost(pathNodes[pathNodes.length-1], pathNodes[0]);
-		return pathCost;
-	}
-	
-	
-	public void printPath(Integer[] path) {
-		if (path == null)  System.out.println("Path NOT Exists");
-		else {
-			for (int i=0; i<path.length; i++) System.out.printf("%3d, ", path[i]);
-			System.out.println(" cost = " + getPathCost(path));
-		}
-		
-	}
-	
-	public void printPathNames(Integer[] path) {
-		
-		if (path == null)  System.out.println("Path NOT Exists");
-		else {
-			for (int i=0; i<path.length; i++) System.out.printf("%5s, ", g.getVertexName(path[i]));
-			System.out.println(" cost = " + getPathCost(path));
+		if (numPop<=numSurvivors) {
+			
 		}
 		
 	}
