@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -57,7 +58,8 @@ public class TSPRandomSelection implements TSPAlgorithm {
 		ArrayList<TSPPath> bestPathList = tsp.getBestPathList(20);
 		Iterator it = bestPathList.iterator();
 		while (it.hasNext()) {
-			((TSPPath)it.next()).printPath();
+			// ((TSPPath)it.next()).printPath();
+			((TSPPath)it.next()).printPathStartingFrom(0);
 		}
 		
 	}
@@ -74,10 +76,17 @@ public class TSPRandomSelection implements TSPAlgorithm {
 	
 	@Override
 	public ArrayList<TSPPath> getBestPathList(int numPath) {
+		
+		Date startTime = new Date();
+		long startMiliSec = startTime.getTime();
+		
 		if (numPath > 0) {
 			ArrayList<TSPPath> population = getRandomPathList(this.sampleSize);
 			ArrayList<TSPPath> survivors = new ArrayList<TSPPath>(numPath);
 			selectFromPopulationByRank(population, survivors, numPath);
+			Date endTime = new Date();
+			long endMiliSec = endTime.getTime();
+			System.out.printf("Time Elapsed: %d (ms)\n", (endMiliSec-startMiliSec));
 			return survivors;
 		}
 		else 
