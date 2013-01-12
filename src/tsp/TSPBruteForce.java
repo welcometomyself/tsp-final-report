@@ -17,7 +17,9 @@
  * 
  *   2012/12/09
  *   
- *   Last Update: 2012/12/23
+ *   History: 
+ *   2012/12/23 XXXXX
+ *   2013/1/12 Utilize TSPPath instead of Integer[] as the path representation of TSP
  */
 
 package tsp;
@@ -35,22 +37,16 @@ import java.util.Vector;
 import graph.*;
 import tsp.util.*;
 
-public class TSPBruteForce {
+public class TSPBruteForce implements TSPAlgorithm {
 
+	public static final int ITERATION_LIMIT=9999999;
+	
 	public static void main(String[] args) throws IOException {
 		
 		// AdjMatrixDirectedGraph g = GraphFactory.readFromFile("graph2.txt");
-		
-		// AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(10); // Given numVertex(cities) as input parameter
-		// AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(10);  // Given numVertex(cities) as input parameter
-		
-		
-	     //AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(11, 0);  // Given numVertex(cities), seed as input parameter
-	     //AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(10, 0);  // Given numVertex(cities), seed as input parameter
-	     //AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(11, 0);  // Given numVertex(cities), seed as input parameter
-	     AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(5, 0);  // Given numVertex(cities), seed as input parameter
-	     
-		
+		//AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(10, 0); // Given numVertex(cities) and random seed as input parameter
+		AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(10,0);  // Given numVertex(cities) and random seed as input parameter
+
 		System.out.println("numVertex: " + g.getNumVertex());
 		System.out.println("numEdges: " + g.getNumEdges());
 		
@@ -58,17 +54,10 @@ public class TSPBruteForce {
 		g.printCostMatrix();
 		System.out.println("");
 		
-		//AdjMatrixUndirectedGraph g2 = GraphFactory.directed2Undirected(g);
-		//System.out.println("g2 cost matrix");
-		//g2.printCostMatrix();
-		
-		TSPBruteForce tsp = new TSPBruteForce(g);
-		//TSPBruteForce tsp = new TSPBruteForce(g2);
-		
-		//tsp.printAllPaths();
+		TSPAlgorithm tsp = new TSPBruteForce(g);
 		
 		System.out.println("Searching for the best path ... ");
-		ArrayList<Integer[]> bestPathList = tsp.getBestPathList();
+		ArrayList<TSPPath> bestPathList = tsp.getBestPathList(20);
 		
 		if (bestPathList.isEmpty()) {
 			System.out.println("Best Route Found: None");
@@ -76,11 +65,13 @@ public class TSPBruteForce {
 			System.out.println("Best Route Found:");
 			Iterator it = bestPathList.iterator();
 			while (it.hasNext()) {
-				tsp.printPath((Integer[])it.next());
-				//tsp.printPathNames((Integer[])it.next());
+				((TSPPath)it.next()).printPath();
 			}
 		}
 		
+		//TSPPath bp = tsp.getBestPath();
+		//System.out.println("(test) Best Route Found:");
+		//bp.printPath();
 		
 	}
 	
@@ -88,15 +79,29 @@ public class TSPBruteForce {
 		this.g = g;
 	}
 	
-	public ArrayList<Integer[]> getBestPathList() {
-		return getBestPathList(9999999);
+	
+	@Override
+	public TSPPath getBestPath() {
+		return getBestPathList(1).get(0);
 	}
 	
-	public ArrayList<Integer[]> getBestPathList(int iterationLimit) {
+	@Override
+	public ArrayList<TSPPath> getBestPathList(int numPath) {
+		ArrayList<TSPPath> allBestPathList = getBestPathList();
+		if (numPath < allBestPathList.size() && numPath > 0) {
+			ArrayList<TSPPath> bestPathList = new ArrayList<TSPPath>(numPath);
+			bestPathList.addAll(allBestPathList.subList(0, numPath));
+			return bestPathList;
+		} else {
+			return allBestPathList;
+		}
+	}
+	
+	public ArrayList<TSPPath> getBestPathList() {
 		
 		int iterationCount = 0;
-		ArrayList<Integer[]> bestPathList = new ArrayList<Integer[]>(30);
-		Integer[] bestPath;
+		ArrayList<TSPPath> bestPathList = new ArrayList<TSPPath>(10);
+		TSPPath bestPath;
 		Integer[] path = new Integer[g.getNumVertex()];
 		// Simply use integers starting from 0 to represent all the vertices(cities)
 		for (int i=0; i<g.getNumVertex(); i++) path[i] = i;
@@ -105,62 +110,45 @@ public class TSPBruteForce {
 		Arrays.sort(path);
 		
 		double tmpPathCost;
-		double minPathCost = getPathCost(path);
+		double minPathCost = TSPPath.getTSPPathCost(path, g);
 		if (minPathCost>=Graph.MAXEDGECOST) { 
 			bestPath = null;
 			minPathCost = Graph.MAXEDGECOST;
 		}
 		else {
-			bestPath = path.clone();
-			printPath(path);
+			bestPath = new TSPPath(path, g, minPathCost);
+			//bestPath.printPath();
 			bestPathList.add(bestPath);
 		}
 		
-		while ((path = (Integer[])Permutation.nextPermutation(path)) != null && iterationCount < iterationLimit) {
+		while ((path = (Integer[])Permutation.nextPermutation(path)) != null && iterationCount < ITERATION_LIMIT) {
 			
 			if (path[0]!=0) break; // Use only the first vertex(city) as starting point for the saleman
 			
-			tmpPathCost = getPathCost(path);
+			tmpPathCost = TSPPath.getTSPPathCost(path, g);
 			if (tmpPathCost < minPathCost) { 
 				minPathCost = tmpPathCost;
-				bestPath = path.clone();
-				printPath(path);
+				bestPath = new TSPPath(path, g, tmpPathCost);
+				// bestPath.printPath();
 				bestPathList.clear();
 				bestPathList.add(bestPath);
 			} else if (tmpPathCost == minPathCost && tmpPathCost<Graph.MAXEDGECOST) {
-				bestPath = path.clone();
-				printPath(path);
+				bestPath = new TSPPath(path, g, tmpPathCost);
+				// bestPath.printPath();
 				bestPathList.add(bestPath);
 			} else {
-				// printPath(path);
+				// do nothing
 			}
 			
 			iterationCount++;
 		}
 		
-		
-		if (iterationCount >=  iterationLimit) System.out.printf("Reached max. iteration limit %d and the search has stopped%n", iterationLimit);
+		if (iterationCount >=  ITERATION_LIMIT) System.out.printf("Reached max. iteration limit %d and the search has stopped%n", ITERATION_LIMIT);
 		else System.out.printf("Iteration count: %d%n", iterationCount);
 		
 		return bestPathList;
 	}
 	
-	public double getPathCost(Integer[] pathNodes) {
-		
-		if (pathNodes.length<2) return 999;
-		int i;
-		double tmpCost;
-		double pathCost=0;
-		for (i=0; i<pathNodes.length-1; i++) {
-			//tmpCost = g.getEdgeCost(pathNodes[i], pathNodes[i+1]);
-			//if (tmpCost < MAXCOST) pathCost += tmpCost;
-			pathCost += g.getEdgeCost(pathNodes[i], pathNodes[i+1]);
-		}
-		pathCost += g.getEdgeCost(pathNodes[pathNodes.length-1], pathNodes[0]);
-		
-		return pathCost;
-		
-	}
 	
 	// print all paths of the graph (of cities for salesmen to visit)
 	public void printAllPaths() {
@@ -172,26 +160,6 @@ public class TSPBruteForce {
 		// Sort the Array path[] to ensure that all permutations will be considered
 		// Arrays.sort(path); // moved to printPermutations()		 
 		 Permutation.printPermutations(path);
-		
-	}
-	
-	
-	public void printPath(Integer[] path) {
-		if (path == null)  System.out.println("Path NOT Exists");
-		else {
-			for (int i=0; i<path.length; i++) System.out.printf("%3d, ", path[i]);
-			System.out.println(" cost = " + getPathCost(path));
-		}
-		
-	}
-	
-	public void printPathNames(Integer[] path) {
-		
-		if (path == null)  System.out.println("Path NOT Exists");
-		else {
-			for (int i=0; i<path.length; i++) System.out.printf("%5s, ", g.getVertexName(path[i]));
-			System.out.println(" cost = " + getPathCost(path));
-		}
 		
 	}
 	

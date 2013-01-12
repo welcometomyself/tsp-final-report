@@ -1,14 +1,43 @@
+/*   
+ *   TSPPath - Manage the path of TSP
+ * 
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * 
+ *   2012/12/29
+ *   
+ *   History:
+ *   2013/01/12 Fix bug for compareTo(); Add getRandomPathList() and static method getTSPPathCost()
+ *    
+ */
+
 package graph;
 
+import java.util.ArrayList;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
+
+import tsp.util.Permutation;
 
 public class TSPPath implements java.lang.Comparable {
 
 	/* 
-	 * Note: Do NOT provide the final node in constructor's pathNodes,
-	 * since the final destination(node) must be the same as the starting node for TSP,
-	 * and this characteristic has been taken care of by this class.
+	 * Note:
+	 * 1. Do NOT provide the final node in constructor's parameter pathNodes,
+	 *    since the final destination(node) must be the same as the starting node for TSP,
+	 *    and this characteristic has been taken care of by this class.
+	 * 2. pathNodes will be cloned while Graph g will NOT
 	 */
 	public TSPPath(Integer[] pathNodes, Graph g) {
 		if (pathNodes == null) this.pathNodes =null;
@@ -16,6 +45,14 @@ public class TSPPath implements java.lang.Comparable {
 		this.g = g; // Modifications of graph can influence this object 
 		this.isValid = _isValid();
 		this.tspCost = Double.NEGATIVE_INFINITY;
+	}
+	
+	public TSPPath(Integer[] pathNodes, Graph g, double cost) {
+		if (pathNodes == null) this.pathNodes =null;
+		else this.pathNodes = pathNodes.clone(); // I don't want the modified pathNodes to influence this object
+		this.g = g; // Modifications of graph can influence this object 
+		this.isValid = _isValid();
+		this.tspCost = cost;
 	}
 	
 	public boolean isValid() {
@@ -41,6 +78,71 @@ public class TSPPath implements java.lang.Comparable {
 	
 	public Integer[] getIntArray() {
 		return pathNodes.clone();
+	}
+	
+	// Get a list of random paths(chromosomes), may be used as the initial population of genetic algorithm
+	public static ArrayList<TSPPath> getRandomPathList(int numPath, Graph g) {
+		Random rnd = new Random();
+		return getRandomPathList(numPath, g, rnd);
+	}
+	
+	public static ArrayList<TSPPath> getRandomPathList(int numPath, Graph g, long seed) {
+		Random rnd = new Random(seed);
+		return getRandomPathList(numPath, g, rnd);
+	}
+	
+	private static ArrayList<TSPPath> getRandomPathList(int numPath, Graph g, Random rnd) {
+		
+		final int ITERATION_LIMIT=9999999;
+		
+		int numVertex = g.getNumVertex();
+		ArrayList<TSPPath> pathList = new ArrayList<TSPPath>(numPath);
+		
+		Integer[] pathNodes = new Integer[numVertex];
+		for (int i=0; i<numVertex; i++) pathNodes[i] = i; // initial path
+	
+		//int numSwap=numVertex>200?30:numVertex/10+10;
+		int numSwap=3;
+		int iterationCount=0;
+		int numPathFound=0;
+		while (numPathFound < numPath && iterationCount < ITERATION_LIMIT) {
+			
+			int i,j;
+			// swap several times
+			for (int count=0; count<numSwap; count++) {
+				i=rnd.nextInt(numVertex-1);
+				j=rnd.nextInt(numVertex-1);
+				Permutation.swap(pathNodes, i, j);
+			}
+			
+			TSPPath tspPath = new TSPPath(pathNodes, g);
+			if (tspPath.getCost()<Graph.MAXEDGECOST) {
+				pathList.add(tspPath);
+				numPathFound++;
+			}
+			iterationCount++; 
+		}
+		System.out.println("numSwap:"+numSwap);
+		return pathList;
+	}
+	
+	
+	/* 
+	 * Note: Do NOT provide the final node of TSP for parameter pathNodes
+	 * since the final destination(node) must be the same as the starting node for TSP,
+	 * and this characteristic has been taken care of by this method.
+	*/
+	public static double getTSPPathCost(Integer[] pathNodes, Graph g) {
+		if (pathNodes.length<2) return 999;
+		int i;
+		double tmpCost;
+		double pathCost=0;
+		for (i=0; i<pathNodes.length-1; i++) {
+			pathCost += g.getEdgeCost(pathNodes[i], pathNodes[i+1]);
+		}
+		pathCost += g.getEdgeCost(pathNodes[pathNodes.length-1], pathNodes[0]);
+		
+		return pathCost;
 	}
 	
 	public double getCost() {
@@ -80,7 +182,7 @@ public class TSPPath implements java.lang.Comparable {
 
 		if (tspPath instanceof TSPPath) {
 			if (this.getCost() < ((TSPPath)tspPath).getCost()) return -1;
-			else if (this.getCost() < ((TSPPath)tspPath).getCost()) return 0;
+			else if (this.getCost() == ((TSPPath)tspPath).getCost()) return 0;
 			else return 1;
 		} else throw new ClassCastException("Given object is NOT an instance of TSPPath to compareTo().");
 		

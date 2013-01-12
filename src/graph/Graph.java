@@ -14,7 +14,7 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- *   Last Update: 2012/12/09
+ *   2012/12/09
  *   
  */
 
@@ -32,7 +32,7 @@ public abstract class Graph {
 		this.numVertex = numVertex;
 
 		for (int i = 0; i < numVertex; i++) {
-			vertexName.add("v" + i);
+			vertexName.add("c" + i);
 		}
 
 	}
