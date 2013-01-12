@@ -18,8 +18,8 @@
  *   2012/12/09
  *   
  *   History: 
- *   2012/12/23 XXXXX
- *   2013/1/12 Utilize TSPPath instead of Integer[] as the path representation of TSP
+ *   2013/1/12 	1. Utilize TSPPath instead of Integer[] as the path representation of TSP
+ *   			2. Add computation of time elapsed
  */
 
 package tsp;
@@ -30,6 +30,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -65,7 +66,8 @@ public class TSPBruteForce implements TSPAlgorithm {
 			System.out.println("Best Route Found:");
 			Iterator it = bestPathList.iterator();
 			while (it.hasNext()) {
-				((TSPPath)it.next()).printPath();
+				//((TSPPath)it.next()).printPath();
+				((TSPPath)it.next()).printPathStartingFrom(0);
 			}
 		}
 		
@@ -98,6 +100,9 @@ public class TSPBruteForce implements TSPAlgorithm {
 	}
 	
 	public ArrayList<TSPPath> getBestPathList() {
+		
+		Date startTime = new Date();
+		long startMiliSec = startTime.getTime();
 		
 		int iterationCount = 0;
 		ArrayList<TSPPath> bestPathList = new ArrayList<TSPPath>(10);
@@ -145,6 +150,10 @@ public class TSPBruteForce implements TSPAlgorithm {
 		
 		if (iterationCount >=  ITERATION_LIMIT) System.out.printf("Reached max. iteration limit %d and the search has stopped%n", ITERATION_LIMIT);
 		else System.out.printf("Iteration count: %d%n", iterationCount);
+		
+		Date endTime = new Date();
+		long endMiliSec = endTime.getTime();
+		System.out.printf("Time Elapsed: %d (ms)\n", (endMiliSec-startMiliSec));
 		
 		return bestPathList;
 	}

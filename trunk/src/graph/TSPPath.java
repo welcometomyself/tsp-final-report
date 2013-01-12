@@ -17,8 +17,10 @@
  *   2012/12/29
  *   
  *   History:
- *   2013/01/12 Fix bug for compareTo(); Add getRandomPathList() and static method getTSPPathCost()
- *    
+ *   2013/01/12 
+ *   	1. Fix bug for compareTo()
+ *   	2. Add getRandomPathList() and static method getTSPPathCost()
+ *   	3. Add printPathStartingFrom(int vertex)/printPathNamesStartingFrom(int vertex)			
  */
 
 package graph;
@@ -122,7 +124,7 @@ public class TSPPath implements java.lang.Comparable {
 			}
 			iterationCount++; 
 		}
-		System.out.println("numSwap:"+numSwap);
+		// System.out.println("numSwap:"+numSwap);
 		return pathList;
 	}
 	
@@ -133,7 +135,7 @@ public class TSPPath implements java.lang.Comparable {
 	 * and this characteristic has been taken care of by this method.
 	*/
 	public static double getTSPPathCost(Integer[] pathNodes, Graph g) {
-		if (pathNodes.length<2) return 999;
+		if (pathNodes.length<2) return Graph.MAXEDGECOST;
 		int i;
 		double tmpCost;
 		double pathCost=0;
@@ -192,11 +194,19 @@ public class TSPPath implements java.lang.Comparable {
 		System.out.println(this);
 	}
 	
-	public void printPathNames() {
-		System.out.println(this.toStringOfNodeNames());
+	public void printPathStartingFrom(int vertex) {
+		System.out.println(this.toStringStartingFrom(vertex));
 	}
 	
-	public String toStringOfNodeNames() {
+	public void printPathNames() {
+		System.out.println(this.toStringOfVertexNames());
+	}
+	
+	public void printPathNamesStartingFrom(int vertex) {
+		System.out.println(this.toStringOfVertexNamesStartingFrom(vertex));
+	}
+	
+	public String toStringOfVertexNames() {
 		if (pathNodes == null) return "NULL_TSP_PATH";
 		else {
 			StringBuilder sb = new StringBuilder();
@@ -209,12 +219,53 @@ public class TSPPath implements java.lang.Comparable {
 		}
 	}
 	
+	public String toStringOfVertexNamesStartingFrom(int vertex) {
+		StringBuilder sb = new StringBuilder();
+		int indexOfVertex=-1;
+		for (int i=0; i<pathNodes.length; i++) {
+			if (pathNodes[i]==vertex) { indexOfVertex=i; break;}
+		}
+		
+		if (indexOfVertex==-1) return "INVALID_STARTING_VERTEX";
+		
+		for (int i=indexOfVertex; i<pathNodes.length; i++) {
+			sb.append(g.getVertexName(pathNodes[i]));
+			sb.append(" ");
+		}
+		for (int i=0; i<indexOfVertex; i++) {
+			sb.append(g.getVertexName(pathNodes[i]));
+			sb.append(" ");
+		}
+		sb.append(String.format("Cost = %.1f", this.getCost()));
+		return sb.toString();
+	}
+	
 	@Override
 	public String toString() {
 		if (pathNodes == null) return "NULL_TSP_PATH";
 		else {
 			StringBuilder sb = new StringBuilder();
 			for (int i=0; i<pathNodes.length; i++) 
+				sb.append(String.format("%3d, ", pathNodes[i]));
+			sb.append(String.format("Cost = %.1f", this.getCost()));
+			return sb.toString();
+		}
+	}
+	
+	public String toStringStartingFrom(int vertex) {
+		if (pathNodes == null) return "NULL_TSP_PATH";
+		else {
+			StringBuilder sb = new StringBuilder();
+			int indexOfVertex=-1;
+			for (int i=0; i<pathNodes.length; i++) {
+				if (pathNodes[i]==vertex) { indexOfVertex=i; break;}
+			}
+			
+			if (indexOfVertex==-1) return "INVALID_STARTING_VERTEX";
+			
+			for (int i=indexOfVertex; i<pathNodes.length; i++) 
+				sb.append(String.format("%3d, ", pathNodes[i]));
+			for (int i=0; i<indexOfVertex; i++) 
 				sb.append(String.format("%3d, ", pathNodes[i]));
 			sb.append(String.format("Cost = %.1f", this.getCost()));
 			return sb.toString();
