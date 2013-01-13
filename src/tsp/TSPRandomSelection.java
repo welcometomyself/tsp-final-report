@@ -43,7 +43,7 @@ public class TSPRandomSelection implements TSPAlgorithm {
 		
 		// AdjMatrixDirectedGraph g = GraphFactory.readFromFile("graph2.txt");
 		//AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(10, 0); // Given numVertex(cities) and random seed as input parameter
-		AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(10,0);  // Given numVertex(cities) and random seed as input parameter
+		AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(20,0);  // Given numVertex(cities) and random seed as input parameter
 
 		System.out.println("numVertex: " + g.getNumVertex());
 		System.out.println("numEdges: " + g.getNumEdges());
@@ -52,10 +52,11 @@ public class TSPRandomSelection implements TSPAlgorithm {
 		g.printCostMatrix();
 		System.out.println("");
 		
-		TSPAlgorithm tsp = new TSPRandomSelection(g);
-		
+		TSPRandomSelection tsp = new TSPRandomSelection(g);
+		tsp.setRandomSeed(0);
 		System.out.printf("The Best Routes Found (Approximation By Random Selection and Ranking):\n");
-		ArrayList<TSPPath> bestPathList = tsp.getBestPathList(20);
+		ArrayList<TSPPath> bestPathList = tsp.getBestPathList(10);
+		
 		Iterator it = bestPathList.iterator();
 		while (it.hasNext()) {
 			// ((TSPPath)it.next()).printPath();
@@ -108,11 +109,10 @@ public class TSPRandomSelection implements TSPAlgorithm {
 	private void selectFromPopulationByRank(ArrayList<TSPPath> pop, ArrayList<TSPPath> survivors, int numPath) {
 		
 		Collections.sort(pop);
-		Iterator it = pop.iterator();
-		int count=0;
-		while (it.hasNext() && count<numPath) {
-			survivors.add((TSPPath)it.next());
-			count++;
+		if (numPath < pop.size() && numPath > 0) {
+			survivors.addAll(pop.subList(0, numPath));
+		} else {
+			survivors.addAll(pop);
 		}
 
 	}
