@@ -30,6 +30,7 @@ public class TSPTest {
 		TSPBruteForce tspBruteForce = new TSPBruteForce(g);
 		TSPRandomSelection tspRandomSelection = new TSPRandomSelection(g);
 		tspRandomSelection.setRandomSeed(randomSeed);
+		TSPNearestNeighbor tspNearestNeighbor = new TSPNearestNeighbor(g);
 		// TSPGeneticAlgorithm tspGeneticAlgorithm = new TSPGeneticAlgorithm(g);
 		
 		ArrayList<TSPPath> bestPathList;
@@ -40,11 +41,12 @@ public class TSPTest {
 		int sampleSize=100;
 		System.out.printf("Sample Size: %d\n", sampleSize);
 		tspRandomSelection.setSampleSize(sampleSize);
-		bestPathList = tspRandomSelection.getBestPathList(3);
+		bestPathList = tspRandomSelection.getBestPathList(1);
 		it = bestPathList.iterator();
 		while (it.hasNext()) {
 			// ((TSPPath)it.next()).printPath();
-			((TSPPath)it.next()).printPathStartingFrom(0);
+			//((TSPPath)it.next()).printPathStartingFrom(0);
+			System.out.printf("Cost(Distance): %.1f\n", ((TSPPath)it.next()).getCost());
 		}
 		//System.out.println(tspRandomSelection.getBestPath());
 		System.out.println("");
@@ -52,14 +54,15 @@ public class TSPTest {
 
 		// Select the best XXX routes from a randomly generated sample pool
 		sampleSize=1000;
-		System.out.printf("The Best Routes Found (Approximation By Random Selection and Ranking):\n");
+		//System.out.printf("The Best Routes Found (Approximation By Random Selection and Ranking):\n");
 		System.out.printf("Sample Size: %d\n", sampleSize);
 		tspRandomSelection.setSampleSize(sampleSize);
-		bestPathList = tspRandomSelection.getBestPathList(3);
+		bestPathList = tspRandomSelection.getBestPathList(1);
 		it = bestPathList.iterator();
 		while (it.hasNext()) {
 			// ((TSPPath)it.next()).printPath();
-			((TSPPath)it.next()).printPathStartingFrom(0);
+			// ((TSPPath)it.next()).printPathStartingFrom(0);
+			System.out.printf("Cost(Distance): %.1f\n", ((TSPPath)it.next()).getCost());
 		}
 		//System.out.println(tspRandomSelection.getBestPath());
 		System.out.println("");
@@ -67,26 +70,40 @@ public class TSPTest {
 
 		// Select the best XXX routes from a randomly generated sample pool
 		sampleSize=10000;
-		System.out.printf("The Best Routes Found (Approximation By Random Selection and Ranking):\n");
+		//System.out.printf("The Best Routes Found (Approximation By Random Selection and Ranking):\n");
 		System.out.printf("Sample Size: %d\n", sampleSize);
 		tspRandomSelection.setSampleSize(sampleSize);
-		bestPathList = tspRandomSelection.getBestPathList(3);
+		bestPathList = tspRandomSelection.getBestPathList(1);
 		it = bestPathList.iterator();
 		while (it.hasNext()) {
 			// ((TSPPath)it.next()).printPath();
-			((TSPPath)it.next()).printPathStartingFrom(0);
+			// ((TSPPath)it.next()).printPathStartingFrom(0);
+			System.out.printf("Cost(Distance): %.1f\n", ((TSPPath)it.next()).getCost());
 		}
 		//System.out.println(tspRandomSelection.getBestPath());
 		System.out.println("");
 		
-	
-		// Brute Force
-		System.out.printf("The Best Routes Found By Brute Force:\n");
-		bestPathList = tspBruteForce.getBestPathList();
+		// Nearest Neighbor
+		System.out.printf("The Best Routes Found By Nearest Neighbor:\n");
+		bestPathList = tspNearestNeighbor.getBestPathList(1);
 		it = bestPathList.iterator();
 		while (it.hasNext()) {
 			// ((TSPPath)it.next()).printPath();
-			((TSPPath)it.next()).printPathStartingFrom(0);
+			// ((TSPPath)it.next()).printPathStartingFrom(0);
+			System.out.printf("Cost(Distance): %.1f\n", ((TSPPath)it.next()).getCost());
+		}
+		//System.out.println(tspNearestNeighbor.getBestPath());
+		System.out.println("");
+		
+		
+		// Brute Force
+		System.out.printf("The Best Routes Found By Brute Force:\n");
+		bestPathList = tspBruteForce.getBestPathList(1);
+		it = bestPathList.iterator();
+		while (it.hasNext()) {
+			// ((TSPPath)it.next()).printPath();
+			// ((TSPPath)it.next()).printPathStartingFrom(0);
+			System.out.printf("Cost(Distance): %.1f\n", ((TSPPath)it.next()).getCost());
 		}
 		//System.out.println(tspBruteForce.getBestPath());
 		System.out.println("");
