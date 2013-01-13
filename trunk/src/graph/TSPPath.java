@@ -30,6 +30,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 
+//import tsp.TSPNearestNeighbor; // tmp test
+
 import tsp.util.Permutation;
 
 public class TSPPath implements java.lang.Comparable {
@@ -73,9 +75,24 @@ public class TSPPath implements java.lang.Comparable {
 		else return true;
 	}
 	
-	
 	public String getNameAt(int index) {
 		return g.getVertexName(index);
+	}
+	
+	public int getVertexAt(int index) {
+		if (index<0 || index>=this.g.getNumVertex()) return -1;
+		else return pathNodes[index];
+	}
+	
+	// return the index of a given vertex in a path
+	public int findIndexOfVertex(int vertex) {
+		for (int i=0; i<pathNodes.length; i++)
+			if (pathNodes[i]==vertex) return i;
+		return -1;
+	}
+	
+	public int getNumVertex() {
+		return pathNodes.length;
 	}
 	
 	public Integer[] getIntArray() {
@@ -100,9 +117,12 @@ public class TSPPath implements java.lang.Comparable {
 		int numVertex = g.getNumVertex();
 		ArrayList<TSPPath> pathList = new ArrayList<TSPPath>(numPath);
 		
+		// tmp test Apply Nearest Neighbor to find initial pathNodes[]
 		Integer[] pathNodes = new Integer[numVertex];
 		for (int i=0; i<numVertex; i++) pathNodes[i] = i; // initial path
-	
+		//TSPNearestNeighbor tsp = new TSPNearestNeighbor(g);
+		//Integer[] pathNodes = tsp.getBestPath().getIntArray();
+		
 		//int numSwap=numVertex>200?30:numVertex/10+10;
 		int numSwap=3;
 		int iterationCount=0;
