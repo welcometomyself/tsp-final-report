@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+           
+    <bean id="directedGraph" class="graph.GraphFactory" factory-method="getRandomDirectedGraph">
+		<constructor-arg value="9" />
+		<constructor-arg value="0" />
+	</bean> 
+	
+	<bean id="tspBruteForce" class="tsp.TSPBruteForce">
+		<constructor-arg ref="directedGraph"/>
+	</bean>
+	
+	<bean id="tspNearestNeighbor" class="tsp.TSPNearestNeighbor">
+		<constructor-arg ref="directedGraph"/>
+	</bean>
+
+	<bean id="tspRandomSelection" class="tsp.TSPRandomSelection">
+		<constructor-arg ref="directedGraph"/>
+		<property name="randomSeed" value="0" />
+		<property name="sampleSize" value="1000" />
+	</bean>
+	
+	<bean id="tspGeneticAlgorithm" class="tsp.TSPGeneticAlgorithm">
+		<constructor-arg ref="directedGraph"/>
+		<property name="randomSeed" value="0" />
+		<property name="popSize" value="1000" />
+	</bean>
+
+	
+</beans>
