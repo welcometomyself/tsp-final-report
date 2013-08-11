@@ -15,93 +15,48 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *   2013/1/13 Cycle Operator is used in cross over reproduction
- *	 
+ *   Joe Huang 2013/1/13 Cycle Operator is used in cross over reproduction
+ *   History:  
+ *   2013/08/10 Do some refactorings
+ *   
  */
 
 package tsp;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import graph.Graph;
+import graph.TSPPath;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 import java.util.Random;
 
-import graph.*;
-import tsp.util.*;
 
-public class TSPGeneticAlgorithm implements TSPAlgorithm {
+public class TSPGeneticAlgorithm extends AbstractTSPAlgorithm {
 	
-	public static void main(String[] args) throws IOException {
-		
-		// AdjMatrixDirectedGraph g = GraphFactory.readFromFile("graph2.txt");
-		//AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(10,0); // Given numVertex(cities) and random seed as input parameter
-		AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(10,0);  // Given numVertex(cities) and random seed as input parameter
-
-		System.out.println("numVertex: " + g.getNumVertex());
-		System.out.println("numEdges: " + g.getNumEdges());
-		
-		System.out.println("Edge Cost Adjacency Matrix:");
-		g.printCostMatrix();
-		System.out.println("");
-		
-		TSPGeneticAlgorithm tsp = new TSPGeneticAlgorithm(g);
-		tsp.setRandomSeed(0);
-		
-		System.out.printf("The Best Routes Found (Approximation By Genetic Algorithm):\n");
-		ArrayList<TSPPath> bestPathList = tsp.getBestPathList(10, 100); // with crossover reproduction
-		Iterator it = bestPathList.iterator();
-		while (it.hasNext()) {
-			((TSPPath)it.next()).printPath();
-			//((TSPPath)it.next()).printPathStartingFrom(0);
-		}
-		
-		System.out.println("");
-		System.out.printf("The Best Routes Found (Approximation By Genetic Algorithm):\n");
-		bestPathList = tsp.getBestPathList(10, 0); // without crossover reproduction
-		it = bestPathList.iterator();
-		while (it.hasNext()) {
-			((TSPPath)it.next()).printPath();
-			//((TSPPath)it.next()).printPathStartingFrom(0);
-		}
-		
-		/*
-		ArrayList<TSPPath> crossoverTestPop = new ArrayList<TSPPath>();
-		tsp.cxCrossover(bestPathList.get(0), bestPathList.get(1), crossoverTestPop);
-		System.out.printf("CX Crossover Test:\n");
-		it = crossoverTestPop.iterator();
-		while (it.hasNext()) {
-			((TSPPath)it.next()).printPath();
-			//((TSPPath)it.next()).printPathStartingFrom(0);
-		}
-		*/
-	}
-
-
-
+	
 	public TSPGeneticAlgorithm(Graph g) {
 		this(g, -1, 100);
 	}
 	
 	public TSPGeneticAlgorithm(Graph g, long randomSeed, int popSize) {
-		this.g = g;
+		super(g);
 		this.randomSeed = randomSeed;
 		this.rnd = new Random(randomSeed);
 		this.popSize = popSize;
 	}
 	
-	public ArrayList<TSPPath> getBestPathList(int numPath, int maxNumIteration) {
+	@Override
+	public List<TSPPath> getBestPathList(int maxNumPath) {
+		return getBestPathList(maxNumPath, 1000);
+	}
+	
+	public List<TSPPath> getBestPathList(int maxNumPath, int maxNumIteration) {
 		Date startTime = new Date();
 		long startMiliSec = startTime.getTime();
 		
-		if (numPath > 0) {
+		if (maxNumPath > 0) {
 			
 			ArrayList<TSPPath> population = new ArrayList<TSPPath>(popSize+1);
 			selectFromPopulationByRank(getRandomPathList(this.popSize*3), population, popSize);
@@ -119,9 +74,9 @@ public class TSPGeneticAlgorithm implements TSPAlgorithm {
 			long endMiliSec = endTime.getTime();
 			System.out.printf("Time Elapsed: %d (ms)\n", (endMiliSec-startMiliSec));
 			
-			if (numPath < population.size() && numPath > 0) {
-				ArrayList<TSPPath> bestPathList = new ArrayList<TSPPath>(numPath);
-				bestPathList.addAll(population.subList(0, numPath));
+			if (maxNumPath < population.size() && maxNumPath > 0) {
+				ArrayList<TSPPath> bestPathList = new ArrayList<TSPPath>(maxNumPath);
+				bestPathList.addAll(population.subList(0, maxNumPath));
 				return bestPathList;
 			} else {
 				return population;
@@ -132,21 +87,12 @@ public class TSPGeneticAlgorithm implements TSPAlgorithm {
 			return null;
 	}
 	
-	@Override
-	public ArrayList<TSPPath> getBestPathList(int numPath) {
-		return getBestPathList(numPath, 100);
-	}
-
-	@Override
-	public TSPPath getBestPath() {
-		return getBestPathList(1).get(0);
-	}
 	
 	private ArrayList<TSPPath> getRandomPathList(int numPath) {
 		if (this.randomSeed >=0)
-			return TSPPath.getRandomPathList(numPath, g, this.randomSeed);
+			return TSPPath.getRandomPathList(numPath, getGraph(), this.randomSeed);
 		else 
-			return TSPPath.getRandomPathList(numPath, g);
+			return TSPPath.getRandomPathList(numPath, getGraph());
 	}
 	
 	private void selectFromPopulationByRank(ArrayList<TSPPath> pop, ArrayList<TSPPath> survivors, int numPath) {
@@ -179,8 +125,6 @@ public class TSPGeneticAlgorithm implements TSPAlgorithm {
 			cxCrossover(path1, path2, sortedPop);
 		}
 	}
-	
-	
 	
 	// Cycle Operator Crossover
 	// path1 and path2 will be mutated after the operation - cycleOperator
@@ -222,10 +166,10 @@ public class TSPGeneticAlgorithm implements TSPAlgorithm {
 		// debug
 		//System.out.printf("Count=%d in cxCrossover()\n", count);
 		
-		double tmpPathCost = TSPPath.getTSPPathCost(newPath1, g);
-		population.add(new TSPPath(newPath1, g, tmpPathCost));
-		tmpPathCost = TSPPath.getTSPPathCost(newPath2, g);
-		population.add(new TSPPath(newPath2, g, tmpPathCost));
+		double tmpPathCost = TSPPath.getTSPPathCost(newPath1, getGraph());
+		population.add(new TSPPath(newPath1, getGraph(), tmpPathCost));
+		tmpPathCost = TSPPath.getTSPPathCost(newPath2, getGraph());
+		population.add(new TSPPath(newPath2, getGraph(), tmpPathCost));
 		
 	}
 	
@@ -245,7 +189,6 @@ public class TSPGeneticAlgorithm implements TSPAlgorithm {
 		this.popSize = popSize;
 	}
 	
-	private Graph g;
 	private long randomSeed;
 	private int popSize;
 	private Random rnd;

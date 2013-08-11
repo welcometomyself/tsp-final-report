@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -38,21 +39,22 @@ public class TSPTestSpring {
 	public static void main(String[] args) throws IOException {
 		
 		ApplicationContext context = new ClassPathXmlApplicationContext("ApplicationContext.xml");
-		TSPBruteForce tspBruteForce = (TSPBruteForce) context.getBean("tspBruteForce");
-		TSPNearestNeighbor tspNearestNeighbor = (TSPNearestNeighbor) context.getBean("tspNearestNeighbor");
-		TSPRandomSelection tspRandomSelection = (TSPRandomSelection) context.getBean("tspRandomSelection");
-		TSPGeneticAlgorithm tspGeneticAlgorithm = (TSPGeneticAlgorithm) context.getBean("tspGeneticAlgorithm");
+		ITSPAlgorithm tspBruteForce = (ITSPAlgorithm) context.getBean("tspBruteForce");
+		ITSPAlgorithm tspNearestNeighbor = (ITSPAlgorithm) context.getBean("tspNearestNeighbor");
+		ITSPAlgorithm tspRandomSelection = (ITSPAlgorithm) context.getBean("tspRandomSelection");
+		ITSPAlgorithm tspGeneticAlgorithm = (ITSPAlgorithm) context.getBean("tspGeneticAlgorithm");
 		
 		// test
-		TSPGeneticAlgorithm tspGeneticAlgorithm2 = (TSPGeneticAlgorithm) context.getBean("tspGeneticAlgorithm");
+		ITSPAlgorithm tspGeneticAlgorithm2 = (ITSPAlgorithm) context.getBean("tspGeneticAlgorithm");
 		if (tspGeneticAlgorithm == tspGeneticAlgorithm2)
 			System.out.println("[TEST] The Same instance!!!");
 			
 		
-		ArrayList<TSPPath> bestPathList;
+		List<TSPPath> bestPathList;
 		Iterator it;
 		
-
+		
+		tspBruteForce.getGraph().printGraph();
 		
 		// Brute Force
 		// if (g.getNumVertex()>100) return;
@@ -65,10 +67,9 @@ public class TSPTestSpring {
 		}
 		System.out.println("");
 		
-		
 		// Select the best XXX routes from a randomly generated sample pool
 		System.out.printf("The Best Routes Found (Approximation By Random Selection and Ranking):\n");
-		System.out.printf("Sample Size: %d\n", tspRandomSelection.getSampleSize());
+		// System.out.printf("Sample Size: %d\n", tspRandomSelection.getSampleSize());
 		bestPathList = tspRandomSelection.getBestPathList(3);
 		it = bestPathList.iterator();
 		while (it.hasNext()) {
@@ -89,7 +90,7 @@ public class TSPTestSpring {
 		
 		// Select the best XXX routes by Genetic Algorithm
 		System.out.printf("The Best Routes Found (Approximation By Genetic Algorithm):\n");
-		System.out.printf("Population Size: %d\n", tspGeneticAlgorithm.getPopSize());
+		// System.out.printf("Population Size: %d\n", tspGeneticAlgorithm.getPopSize());
 		bestPathList = tspGeneticAlgorithm.getBestPathList(3);
 		it = bestPathList.iterator();
 		while (it.hasNext()) {

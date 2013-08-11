@@ -15,113 +15,83 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- *   2012/12/09
+ *   Joe Huang 2012/12/09
  *   
  *   History: 
- *   2013/1/12 	1. Utilize TSPPath instead of Integer[] as the path representation of TSP
+ *   2013/01/12 1. Utilize TSPPath instead of Integer[] as the path representation of TSP
  *   			2. Add computation of time elapsed
+ *   2013/08/10 Do some refactorings
+ *   
  */
 
 package tsp;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import graph.Graph;
+import graph.TSPPath;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
 
-import graph.*;
-import tsp.util.*;
+import tsp.util.Permutation;
 
-public class TSPBruteForce implements TSPAlgorithm {
+public class TSPBruteForce extends AbstractTSPAlgorithm {
 
 	public static final int ITERATION_LIMIT=9999999;
 	
-	public static void main(String[] args) throws IOException {
-		
-		// AdjMatrixDirectedGraph g = GraphFactory.readFromFile("graph2.txt");
-		//AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(10, 0); // Given numVertex(cities) and random seed as input parameter
-		AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(10,0);  // Given numVertex(cities) and random seed as input parameter
-
-		System.out.println("numVertex: " + g.getNumVertex());
-		System.out.println("numEdges: " + g.getNumEdges());
-		
-		System.out.println("Edge Cost Adjacency Matrix:");
-		g.printCostMatrix();
-		System.out.println("");
-		
-		TSPAlgorithm tsp = new TSPBruteForce(g);
-		
-		System.out.println("Searching for the best path ... ");
-		ArrayList<TSPPath> bestPathList = tsp.getBestPathList(20);
-		
-		if (bestPathList.isEmpty()) {
-			System.out.println("Best Route Found: None");
-		} else {
-			System.out.println("Best Route Found:");
-			Iterator it = bestPathList.iterator();
-			while (it.hasNext()) {
-				//((TSPPath)it.next()).printPath();
-				((TSPPath)it.next()).printPathStartingFrom(0);
-			}
-		}
-		
-		//TSPPath bp = tsp.getBestPath();
-		//System.out.println("(test) Best Route Found:");
-		//bp.printPath();
-		
-	}
-	
 	public TSPBruteForce(Graph g) {
-		this.g = g;
+		super(g);
 	}
 	
-	
-	@Override
-	public TSPPath getBestPath() {
-		return getBestPathList(1).get(0);
+	// print all paths of the graph (of cities for salesmen to visit)
+	public void printAllPaths() {
+		
+		Integer[] path = new Integer[getGraph().getNumVertex()];
+		
+		// Simply use integers starting from 0 to represent all the vertices(cities)
+		for (int i=0; i<getGraph().getNumVertex(); i++) path[i] = i;
+		// Sort the Array path[] to ensure that all permutations will be considered
+		// Arrays.sort(path); // moved to printPermutations()		 
+		 Permutation.printPermutations(path);
+		
 	}
+
 	
 	@Override
-	public ArrayList<TSPPath> getBestPathList(int numPath) {
-		ArrayList<TSPPath> allBestPathList = getBestPathList();
-		if (numPath < allBestPathList.size() && numPath > 0) {
-			ArrayList<TSPPath> bestPathList = new ArrayList<TSPPath>(numPath);
-			bestPathList.addAll(allBestPathList.subList(0, numPath));
+	public List<TSPPath> getBestPathList(int maxNumPath) {
+		List<TSPPath> allBestPathList = getBestPathListInternal();
+		if (maxNumPath < allBestPathList.size() && maxNumPath > 0) {
+			ArrayList<TSPPath> bestPathList = new ArrayList<TSPPath>(maxNumPath);
+			bestPathList.addAll(allBestPathList.subList(0, maxNumPath));
 			return bestPathList;
 		} else {
 			return allBestPathList;
 		}
 	}
 	
-	public ArrayList<TSPPath> getBestPathList() {
-		
+	private List<TSPPath> getBestPathListInternal() {
 		Date startTime = new Date();
 		long startMiliSec = startTime.getTime();
 		
 		int iterationCount = 0;
 		ArrayList<TSPPath> bestPathList = new ArrayList<TSPPath>(10);
 		TSPPath bestPath;
-		Integer[] path = new Integer[g.getNumVertex()];
+		Integer[] path = new Integer[getGraph().getNumVertex()];
 		// Simply use integers starting from 0 to represent all the vertices(cities)
-		for (int i=0; i<g.getNumVertex(); i++) path[i] = i;
+		for (int i=0; i<getGraph().getNumVertex(); i++) path[i] = i;
 		
 		// Sort the Array path[] to ensure that all permutations will be considered
 		Arrays.sort(path);
 		
 		double tmpPathCost;
-		double minPathCost = TSPPath.getTSPPathCost(path, g);
+		double minPathCost = TSPPath.getTSPPathCost(path, getGraph());
 		if (minPathCost>=Graph.MAXEDGECOST) { 
 			bestPath = null;
 			minPathCost = Graph.MAXEDGECOST;
 		}
 		else {
-			bestPath = new TSPPath(path, g, minPathCost);
+			bestPath = new TSPPath(path, getGraph(), minPathCost);
 			//bestPath.printPath();
 			bestPathList.add(bestPath);
 		}
@@ -130,15 +100,15 @@ public class TSPBruteForce implements TSPAlgorithm {
 			
 			if (path[0]!=0) break; // Use only the first vertex(city) as starting point for the saleman
 			
-			tmpPathCost = TSPPath.getTSPPathCost(path, g);
+			tmpPathCost = TSPPath.getTSPPathCost(path, getGraph());
 			if (tmpPathCost < minPathCost) { 
 				minPathCost = tmpPathCost;
-				bestPath = new TSPPath(path, g, tmpPathCost);
+				bestPath = new TSPPath(path, getGraph(), tmpPathCost);
 				// bestPath.printPath();
 				bestPathList.clear();
 				bestPathList.add(bestPath);
 			} else if (tmpPathCost == minPathCost && tmpPathCost<Graph.MAXEDGECOST) {
-				bestPath = new TSPPath(path, g, tmpPathCost);
+				bestPath = new TSPPath(path, getGraph(), tmpPathCost);
 				// bestPath.printPath();
 				bestPathList.add(bestPath);
 			} else {
@@ -157,21 +127,5 @@ public class TSPBruteForce implements TSPAlgorithm {
 		
 		return bestPathList;
 	}
-	
-	
-	// print all paths of the graph (of cities for salesmen to visit)
-	public void printAllPaths() {
-		
-		Integer[] path = new Integer[g.getNumVertex()];
-		
-		// Simply use integers starting from 0 to represent all the vertices(cities)
-		for (int i=0; i<g.getNumVertex(); i++) path[i] = i;
-		// Sort the Array path[] to ensure that all permutations will be considered
-		// Arrays.sort(path); // moved to printPermutations()		 
-		 Permutation.printPermutations(path);
-		
-	}
-	
-	private Graph g;
 
 }

@@ -57,17 +57,17 @@ public class GraphFactory {
 		g.setVertexName(3, "LOS");
 		g.setVertexName(4, "TPE");
 		
-		g.printCostMatrix();
+		g.printGraph();
 		
 		System.out.println("");
 		
 		AdjMatrixUndirectedGraph g2 = GraphFactory.directed2Undirected(g);
-		g2.printCostMatrix();
+		g2.printGraph();
 		
 		System.out.println("");
 		
 		AdjMatrixDirectedGraph g3 = GraphFactory.undirected2Directed(g2);
-		g3.printCostMatrix();
+		g3.printGraph();
 		
 	}
 	

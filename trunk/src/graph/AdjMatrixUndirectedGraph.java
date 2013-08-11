@@ -16,19 +16,21 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- *   Last Update: 2012/12/23
+ *   Joe Huang 2012/12/23
+ *   
+ *   History:
+ *   2013/08/10 Rename printCostMatrix() as printGraph() 
+ *
  */
 
 package graph;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.Iterator;
 import java.util.Vector;
+
 
 public class AdjMatrixUndirectedGraph extends Graph {
 	
@@ -47,6 +49,7 @@ public class AdjMatrixUndirectedGraph extends Graph {
 
 	}
 
+	@Override
 	public int getNumEdges() {
 		int numEdges = 0;
 		double tmpEdgeCost;
@@ -63,26 +66,32 @@ public class AdjMatrixUndirectedGraph extends Graph {
 		return numEdges;
 	}
 
+	@Override
 	public double getEdgeCost(int i, int j) {
 		if (i<j) return edgeCost.get(j).get(i);
 		else return edgeCost.get(i).get(j);
 	}
 
+	@Override
 	public void setEdgeCost(int i, int j, double cost) {
 		if (i<j) edgeCost.get(j).set(i, cost);
 		else edgeCost.get(i).set(j, cost);
 	}
 
-	// Edge Cost Adjacency Matrix
-	public void printCostMatrix() throws IOException {
+	
+	@Override
+	public void printGraph() throws IOException {
 		BufferedWriter w = new BufferedWriter(new PrintWriter(System.out));
-		printCostMatrix(w);
+		printGraph(w);
 	}
 
-	public void printCostMatrix(BufferedWriter w) throws IOException {
+	@Override
+	public void printGraph(BufferedWriter w) throws IOException {
 
 		double tmpCost;
-		w.write("      ");
+		w.write("Graph Represented By Adjacency Matrix:");
+		w.write("\nnumVertex: " + getNumVertex() + "   numEdges: " + getNumEdges());
+		w.write("\n      ");
 		for (int i = 0; i < getNumVertex(); i++)
 			w.write(String.format("%5s ", getVertexName(i)));
 		w.write("\n");
@@ -96,10 +105,11 @@ public class AdjMatrixUndirectedGraph extends Graph {
 			}
 			w.write("\n");
 		}
+		w.write("\n");
 		w.flush();
-
+		
 	}
-
+	
 	// Adjacency Matrix for the edges cost
 	private Vector<Vector<Double>> edgeCost;
 
