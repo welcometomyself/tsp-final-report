@@ -15,68 +15,36 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- *   2013/1/12 
- *	 
+ *   Joe Huang 2013/1/12 
+ *	 History:  
+ *   2013/08/10 Do some refactorings
+ *
  */
 
 package tsp;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import graph.Graph;
+import graph.TSPPath;
+
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Vector;
-import java.util.Random;
 
-import graph.*;
-import tsp.util.*;
-
-public class TSPRandomSelection implements TSPAlgorithm {
-	
-	public static void main(String[] args) throws IOException {
-		
-		// AdjMatrixDirectedGraph g = GraphFactory.readFromFile("graph2.txt");
-		//AdjMatrixDirectedGraph g = GraphFactory.getRandomDirectedGraph(10, 0); // Given numVertex(cities) and random seed as input parameter
-		AdjMatrixUndirectedGraph g = GraphFactory.getRandomUndirectedGraph(20,0);  // Given numVertex(cities) and random seed as input parameter
-
-		System.out.println("numVertex: " + g.getNumVertex());
-		System.out.println("numEdges: " + g.getNumEdges());
-		
-		System.out.println("Edge Cost Adjacency Matrix:");
-		g.printCostMatrix();
-		System.out.println("");
-		
-		TSPRandomSelection tsp = new TSPRandomSelection(g);
-		tsp.setRandomSeed(0);
-		System.out.printf("The Best Routes Found (Approximation By Random Selection and Ranking):\n");
-		ArrayList<TSPPath> bestPathList = tsp.getBestPathList(10);
-		
-		Iterator it = bestPathList.iterator();
-		while (it.hasNext()) {
-			// ((TSPPath)it.next()).printPath();
-			((TSPPath)it.next()).printPathStartingFrom(0);
-		}
-		
-	}
+public class TSPRandomSelection extends AbstractTSPAlgorithm {
 	
 	public TSPRandomSelection(Graph g) {
 		this(g, -1, 1000);
 	}
 	
 	public TSPRandomSelection(Graph g, long randomSeed, int sampleSize) {
-		this.g = g;
+		super(g);
 		this.randomSeed = randomSeed;
 		this.sampleSize = sampleSize;
 	}
 	
 	@Override
-	public ArrayList<TSPPath> getBestPathList(int numPath) {
+	public List<TSPPath> getBestPathList(int numPath) {
 		
 		Date startTime = new Date();
 		long startMiliSec = startTime.getTime();
@@ -93,17 +61,12 @@ public class TSPRandomSelection implements TSPAlgorithm {
 		else 
 			return null;
 	}
-
-	@Override
-	public TSPPath getBestPath() {
-		return getBestPathList(1).get(0);
-	}
 	
 	private ArrayList<TSPPath> getRandomPathList(int numPath) {
 		if (this.randomSeed >=0)
-			return TSPPath.getRandomPathList(numPath, g, this.randomSeed);
+			return TSPPath.getRandomPathList(numPath, getGraph(), this.randomSeed);
 		else 
-			return TSPPath.getRandomPathList(numPath, g);
+			return TSPPath.getRandomPathList(numPath, getGraph());
 	}
 	
 	private void selectFromPopulationByRank(ArrayList<TSPPath> pop, ArrayList<TSPPath> survivors, int numPath) {
@@ -133,7 +96,6 @@ public class TSPRandomSelection implements TSPAlgorithm {
 		this.sampleSize = sampleSize;
 	}
 	
-	private Graph g;
 	private long randomSeed;
 	private int sampleSize;
 

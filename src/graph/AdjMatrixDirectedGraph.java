@@ -14,17 +14,15 @@
  *   You should have received a copy of the GNU General Public License
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * 
- *   Last Update: 2012/12/09
+ *   Joe Huang 2012/12/09
+ *   
+ *   History:
+ *   2013/08/10 Move printCostMatrix() to Graph, renamed as printGraph() 
+ *   
  */
 
 package graph;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Writer;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -45,6 +43,7 @@ public class AdjMatrixDirectedGraph extends Graph {
 
 	}
 
+	@Override
 	public int getNumEdges() {
 		int numEdges = 0;
 		double tmpEdgeCost;
@@ -61,39 +60,14 @@ public class AdjMatrixDirectedGraph extends Graph {
 		return numEdges;
 	}
 
+	@Override
 	public double getEdgeCost(int i, int j) {
 		return edgeCost.get(i).get(j);
 	}
 
+	@Override
 	public void setEdgeCost(int i, int j, double cost) {
 		edgeCost.get(i).set(j, cost);
-	}
-
-	// Edge Cost Adjacency Matrix
-	public void printCostMatrix() throws IOException {
-		BufferedWriter w = new BufferedWriter(new PrintWriter(System.out));
-		printCostMatrix(w);
-	}
-
-	public void printCostMatrix(BufferedWriter w) throws IOException {
-
-		double tmpCost;
-		w.write("      ");
-		for (int i = 0; i < getNumVertex(); i++)
-			w.write(String.format("%5s ", getVertexName(i)));
-		w.write("\n");
-		for (int i = 0; i < getNumVertex(); i++) {
-			w.write(String.format("%5s ", getVertexName(i)));
-			for (int j = 0; j < getNumVertex(); j++) {
-				tmpCost=getEdgeCost(i,j);
-				if (tmpCost<Graph.MAXEDGECOST)
-					w.write(String.format("%5.0f ", tmpCost));
-				else w.write(String.format("  INF "));
-			}
-			w.write("\n");
-		}
-		w.flush();
-
 	}
 
 	// Adjacency Matrix for the edges cost
